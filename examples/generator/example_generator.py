@@ -28,6 +28,9 @@ import matplotlib.pyplot as plt
 from matplotlib import rc_file
 rc_file('matplotlibrc')
 
+# Fix for Python3
+raw_input = input
+
 
 class ExampleGenerator(object):
     def __init__(self, graph_file, output_path, automatically):
@@ -57,14 +60,14 @@ class ExampleGenerator(object):
         self.graph, self.egress_nodes, self.name_to_node, self.node_to_name, self.shortest_path_lengths, \
         self.shortest_paths, self.non_shortest_paths = self.get_graph(graph_file)
 
-        print 'GRAPH DONE'
+        print('GRAPH DONE')
 
         # get organisations and their prefixes from file
         organisation_file = 'as_to_org.txt'
         self.asn_to_organisation, self.organisations = self.load_organisations(organisation_file)
         # self.asn_to_organisation, self.organisations = self.load_few_organisations()
 
-        print 'ORGANISATIONS DONE'
+        print('ORGANISATIONS DONE')
 
         # specify the number of prefixes if you want to restrict the number of prefixes considered. You can also specify
         # multiple numbers in the list and one example is generated for each number specified. To use all prefixes,
@@ -97,7 +100,7 @@ class ExampleGenerator(object):
             }
 
             output_file = '%s/ndb_dump.out' % tmp_op
-            with open(output_file, 'w') as outfile:
+            with open(output_file, 'wb') as outfile:
                 pickle.dump(data, outfile)
 
             output_graph_file = '%s/ndb_topo.out' % tmp_op
@@ -108,7 +111,7 @@ class ExampleGenerator(object):
             if STATS:
                 self.produce_stats(tmp_op)
 
-            print 'PATHS DONE FOR %s' % (str(n_p) if n_p else 'all', )
+            print('PATHS DONE FOR %s' % (str(n_p) if n_p else 'all', ))
 
             # add config file
 
@@ -140,15 +143,15 @@ class ExampleGenerator(object):
 
     def get_graph(self, graph_file):
         # load graph from file
-        print 'reading graph file'
+        print('reading graph file')
         graph = nx.read_graphml(graph_file)
 
         # compute the length of the shortest path between any two nodes
-        print 'computing shortest path lengths'
-        sp_lengths = nx.all_pairs_dijkstra_path_length(graph)
+        print('computing shortest path lengths')
+        sp_lengths = dict(nx.all_pairs_dijkstra_path_length(graph))
 
         # compute all shortest paths between any two nodes
-        print 'computing shortest paths'
+        print('computing shortest paths')
         shortest_paths = defaultdict(dict)
         nodes = nx.nodes(graph)
         for n1, n2 in itertools.product(nodes, nodes):
@@ -156,7 +159,7 @@ class ExampleGenerator(object):
 
         # compute some non shortest paths between any two nodes
         if False:
-            print 'computing non-shortest paths'
+            print('computing non-shortest paths')
             non_shortest_paths = defaultdict(dict)
             for n1, n2 in itertools.product(nodes, nodes):
                 cutoff = sp_lengths[n1][n2] + 1
@@ -166,7 +169,7 @@ class ExampleGenerator(object):
             non_shortest_paths = shortest_paths
 
         # create node abbreviation to actual name mapping
-        print 'node to name mapping'
+        print('node to name mapping')
         node_to_name = dict()
         name_to_node = dict()
         if not self.automatically:
@@ -181,27 +184,26 @@ class ExampleGenerator(object):
                 name_to_node[name] = node
 
         # get egress nodes
-        print 'egress nodes'
+        print('egress nodes')
         invalid_input = True
         egress_nodes = list()
         if not self.automatically:
             while invalid_input:
-                print 'Which of the following nodes are egress nodes?\n%s\nEnd with empty line' \
-                      % ', '.join([str(node) for node in nx.nodes(graph)])
-                more_input = True
+                print('Which of the following nodes are egress nodes?\n%s\nEnd with empty line' \
+                      % ', '.join([str(node) for node in nx.nodes(graph)]), more_input = True)
                 while more_input:
                     input = raw_input()
                     if not input:
                         more_input = False
                     elif input not in nx.nodes(graph):
-                        print 'Error the given node is unknown'
+                        print('Error the given node is unknown')
                     else:
                         egress_nodes.append(input)
 
                 if egress_nodes:
                     invalid_input = False
                 else:
-                    print 'You need to specify at least one egress node'
+                    print('You need to specify at least one egress node')
         else:
             num_egresses = int(raw_input('Number of Egresses? (Total number of nodes: %d)\n' % len(nodes)))
             egress_nodes = np.random.choice(nodes, num_egresses, replace=False)
@@ -242,7 +244,7 @@ class ExampleGenerator(object):
                         mode = 2
                 else:
                     if mode == -1:
-                        print 'NOT READY - NO FORMAT DEFINITION'
+                        print('NOT READY - NO FORMAT DEFINITION')
                         sys.exit(0)
                     elif mode == 1:
                         # format:org_id|changed|org_name|country|source
@@ -256,7 +258,7 @@ class ExampleGenerator(object):
                         asn_to_org_id[asn] = org_id
 
         asn_to_name = dict()
-        for asn, org_id in asn_to_org_id.iteritems():
+        for asn, org_id in asn_to_org_id.items():
             asn_to_name[asn] = org_id_to_name[org_id]
 
         return asn_to_name, names
@@ -285,6 +287,7 @@ class ExampleGenerator(object):
 
         if not limit:
             limit = len(prefixes)
+        print("Using {} prefixes of {} prefixes in total".format(limit, len(prefixes)))
 
         # create the mapping of prefixes to their organisation (AS)
         unknown = list()
@@ -321,7 +324,7 @@ class ExampleGenerator(object):
                 organisation_to_prefix[org].append(only_prefixes[i])
 
             prev = 0
-            for org, p in o_p.iteritems():
+            for org, p in o_p.items():
                 next = prev + int(len(prefixes_to_split) * p / total_p)
                 organisation_to_prefix[org] = only_prefixes[prev:next]
                 for prefix in only_prefixes[prev:next]:
@@ -343,9 +346,9 @@ class ExampleGenerator(object):
 
                 j += 1
 
-        print 'THERE WERE %d UNKNOWN ORGANIZATIONS' % (len(unknown), )
+        print('THERE WERE %d UNKNOWN ORGANIZATIONS' % (len(unknown), ))
 
-        for organisation, prefixes in organisation_to_prefix.iteritems():
+        for organisation, prefixes in organisation_to_prefix.items():
             self.stats['organisation_prefixes'].append(len(prefixes))
 
         return organisation_to_prefix, prefix_to_organisation
@@ -396,8 +399,8 @@ class ExampleGenerator(object):
 
         additional_feature_values = defaultdict(set)
 
-        print 'start computing all the paths'
-        for organisation, prefixes in self.organisation_to_prefix.iteritems():
+        print('start computing all the paths')
+        for organisation, prefixes in self.organisation_to_prefix.items():
             # decide whether the node is multi-exit (hot-potato routing) or single exit
             # aka pick the egresses
             egress_nodes = self.get_egresses()
@@ -434,7 +437,7 @@ class ExampleGenerator(object):
                         if curr_egress == node:
                             tmp_paths = [[curr_egress]]
                         else:
-                            print 'THERE IS A PROBLEM WITH THE PATH FROM %s TO %s' % (node, curr_egress)
+                            print('THERE IS A PROBLEM WITH THE PATH FROM %s TO %s' % (node, curr_egress))
 
                     # if there are equal cost paths, use them
                     for path in tmp_paths:
@@ -457,11 +460,11 @@ class ExampleGenerator(object):
 
                     i += 1
 
-        print 'i: %d, j: %d, k: %d' % (i, j, k)
+        print('i: %d, j: %d, k: %d' % (i, j, k))
 
-        print 'NUM VALUES PER ADDITIONAL FEATURE:'
-        for q, values in additional_feature_values.iteritems():
-            print '%d' % (len(values), )
+        print('NUM VALUES PER ADDITIONAL FEATURE:')
+        for q, values in additional_feature_values.items():
+            print('%d' % (len(values), ))
 
         return paths
 
@@ -473,7 +476,7 @@ class ExampleGenerator(object):
 
         with open('%s/waypoints.grammar' % output_path, 'w') as outfile:
             outfile.write('# Waypoints\n')
-            for node, name in self.node_to_name.iteritems():
+            for node, name in self.node_to_name.items():
                 outfile.write('(rule $Hop (%s) (ConstantFn (string %s)))\n' % (name.lower(), str(node)))
 
     def produce_stats(self, output_path):
@@ -483,10 +486,10 @@ class ExampleGenerator(object):
 
         fig, axes = plt.subplots(cols, rows, sharex=False, sharey=True)
 
-        print 'N-%d, R-%d, C-%d, 1-%d 2-%d' % (num_plots, rows, cols, len(axes), len(axes[0]))
+        print('N-%d, R-%d, C-%d, 1-%d 2-%d' % (num_plots, rows, cols, len(axes), len(axes[0])))
 
         i = 0
-        for name, stats in self.stats.iteritems():
+        for name, stats in self.stats.items():
             col = int(i/rows)
             row = i % rows
 
@@ -500,7 +503,7 @@ class ExampleGenerator(object):
             value_range = (min_value - 0.1, max_value + 0.1)
 
             num_bins = 1000
-            p1 = ax.hist(stats, range=value_range, bins=num_bins, normed=1, histtype='step', cumulative='True')
+            p1 = ax.hist(stats, range=value_range, bins=num_bins, density=True, histtype='step', cumulative='True')
 
             ax.set_title('CDF: %s' % name.replace('_', ' '))
             ax.set_ylim(0, 1)

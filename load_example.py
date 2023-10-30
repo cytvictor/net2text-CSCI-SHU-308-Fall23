@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Author: Ruediger Birkner (Networked Systems Group at ETH Zurich)
 
 import argparse
@@ -11,7 +10,7 @@ import random
 def load_example(topo_path, data_path):
 
     # read data from file
-    with open(data_path, 'r') as infile:
+    with open(data_path, 'rb') as infile:
         data = pickle.load(infile)
 
     destination_to_prefix = data['destination_to_prefix']
@@ -58,13 +57,15 @@ class NDBEntry(object):
             feature_id = int(key.split('_')[1])
             return self.additional_features[feature_id]
         else:
-            print 'UNKNOWN FEATURE: %s' % key
+            return 'UNKNOWN FEATURE: %s' % key
 
     def __str__(self):
-        return "{path} - {destination} - {prefix} - {size}".format(path=" -> ".join(self.path),
-                                                                   destination=self.destination,
-                                                                   prefix=self.prefix,
-                                                                   size=self.traffic_size)
+        return "Flow(path={path}, organization={destination}, prefix={prefix}, bandwidth={size}, sp={shortest_path}".format(
+            path=" -> ".join(self.path),
+            destination=self.destination,
+            prefix=self.prefix,
+            size=self.traffic_size,
+            shortest_path=self.shortest_path)
 
     def __repr__(self):
         return self.__str__()
@@ -85,7 +86,7 @@ def main(example_path):
                                                                                                   len(topo.edges()))
     output += "This is a random flow: {}".format(random.choice(paths))
 
-    print output
+    print(output)
 
 
 if __name__ == "__main__":

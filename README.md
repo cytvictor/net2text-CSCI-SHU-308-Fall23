@@ -1,3 +1,34 @@
+# CSCI-SHU 308 Notes
+
+There are three pre-generated network flow data for a same 25-nodes topology called "ATT_NA (ATT North America)".
+
+| directory | #nodes | #edges | #prefixes | Flow count | 
+| --------- | ------ | ------ | --------- | ---------- |
+| examples/att_na/AttMpls-10-egress_100 | 25 | 57 | 100 | 2585 |
+| examples/att_na/AttMpls-10-egress_1000 | 25 | 57 | 1000 | 25456 |
+| examples/att_na/AttMpls-10-egress_10000 | 25 | 57 | 10000 | 255003 |
+
+You may start work on `load_example.py` to see how the flow database is organized. Now this script simply counts the number of flows and randomly print one flow:
+
+```bash
+$ python load_example.py examples/att_na/AttMpls-10-egress_100
+Successfully read the example files.
+There is a total of 2585 flows in a topology with 25 nodes and 57 edges.
+
+This is a random flow: Flow(path=24 -> 12 -> 13 -> 5 -> 7, organization=Lao Telecommunication IX, prefix=115.84.82.0/24, bandwidth=204.43353242530557, sp=True
+```
+
+This example includes the features mentioned in the paper: `path`, `organization`, `bandwidth`, `is-shortest-path`.
+
+For your reference, they are generated using the following command:
+
+```bash
+$ cd examples/generator/
+$ python example_generator.py ../att_na/AttMpls.graphml ../att_na/AttMpls-10-egress -a
+```
+
+Below is the README from [Net2Text original repository](https://github.com/nsg-ethz/net2text).
+
 # Net2Text
 
 This repository contains the code to generate the datasets used in the
