@@ -1,5 +1,17 @@
 # CSCI-SHU 308 Notes
 
+## 1. How to set up the environment
+
+Prerequisites:
+- [Python3](https://www.python.org/downloads). Please note some old versioned macOS and Linux defaults to Python 2.
+- pip (shipped with Python in most cases)
+- `networkx` pip package
+
+```bash
+pip3 install networkx
+```
+
+## 2. How to use pre-generated datasets
 There are three pre-generated network flow data for a same 25-nodes topology called "ATT_NA (ATT North America)".
 
 | directory | #nodes | #edges | #prefixes | Flow count | 
@@ -20,6 +32,7 @@ This is a random flow: Flow(path=24 -> 12 -> 13 -> 5 -> 7, organization=Lao Tele
 
 This example includes the features mentioned in the paper: `path`, `organization`, `bandwidth`, `is-shortest-path`.
 
+## Appendix 1. Dataset generation
 For your reference, they are generated using the following command:
 
 ```bash
