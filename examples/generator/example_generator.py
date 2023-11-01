@@ -104,7 +104,8 @@ class ExampleGenerator(object):
                 pickle.dump(data, outfile)
 
             output_graph_file = '%s/ndb_topo.out' % tmp_op
-            nx.write_gpickle(self.graph, output_graph_file)
+            with open(output_graph_file, 'wb') as outfile:
+                pickle.dump(self.graph, outfile)
 
             # self.create_grammar_mappings(tmp_op)
 
