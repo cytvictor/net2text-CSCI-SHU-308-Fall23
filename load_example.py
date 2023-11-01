@@ -20,7 +20,8 @@ def load_example(topo_path, data_path):
     name_to_node = data['name_to_node']
 
     # topology
-    topo = nx.read_gpickle(topo_path)
+    with open(topo_path, 'rb') as infile:
+        topo = pickle.load(infile)
 
     paths = list()
     for path in data['paths']:
